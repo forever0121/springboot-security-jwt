@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.forever.springbootSecurityJwt.mapper.AuthMapper">
+    <resultMap id="userResultMap" type="com.forever.springbootSecurityJwt.model.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <collection property="roleList" ofType="com.forever.springbootSecurityJwt.model.Role">
+            <result column="id" property="id"/>
+            <result column="name" property="name"/>
+            <result column="nameZh" property="nameZh"/>
+        </collection>
+    </resultMap>
+    <select id="findByUsername" resultMap="userResultMap">
+        SELECT u.id, u.username,u.password,u.nickname,r.id,r.name,r.nameZh
+        from sys_user u join sys_user_role ur on u.id = ur.user_id join sys_role r on r.id = ur.role_id
+        where u.username = #{name}
+    </select>
+
+    <insert id="insert" parameterType="com.forever.springbootSecurityJwt.model.User" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_user (username, password) VALUES (#{username}, #{password});
+    </insert>
+
+    <insert id="insertRole">
+        insert into sys_user_role (user_id, role_id) VALUES (#{userId}, #{roleId});
+    </insert>
+
+    <select id="findRoleById" resultType="com.forever.springbootSecurityJwt.model.Role">
+      select id, name, nameZh from sys_role where id = #{roleId}
+    </select>
+
+    <select id="findRoleByUserId" resultType="com.forever.springbootSecurityJwt.model.Role">
+        select * from sys_role where id in (SELECT role_id from sys_user_role where user_id = #{userId});
+    </select>
+</mapper>
